@@ -59,6 +59,10 @@ module.exports = class App {
         this.#vendorDir = path.resolve(this.#rootDir, "vendor");
     }
 
+    #log(...message) {
+        console.log("[" + (new Date()).toLocaleString() + "]", ...message);
+    }
+
     async init() {
         // Check if the Composer file exists in fact
         if (!fs.existsSync(this.#composerFile)) {
@@ -79,6 +83,7 @@ module.exports = class App {
         this.#watcher.on("unlink", this.#updateAutoloader.bind(this));
 
         this.loadConfig();
+        this.#updateAutoloader(this.#composerFile);
     }
 
     /**
@@ -93,9 +98,10 @@ module.exports = class App {
         }).toString("utf8")
 
         if (result.toLocaleLowerCase().includes("generated autoload files")) {
-            debug("success");
+            this.#log("Composer autoloader has been updated");
         } else {
-            debug("failed");
+            this.#log("The autoloader has failed to update:");
+            this.#log(result);
         }
     }
 
